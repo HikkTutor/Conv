@@ -21,6 +21,7 @@
             --mc-light: #2ecc71;
             --mc-border: #3d6b52;
             --mc-error: #e74c3c;
+            --mc-gold: #f1c40f;
         }
 
         body {
@@ -34,12 +35,13 @@
             align-items: center;
             position: relative;
             overflow-x: hidden;
+            line-height: 1.6;
         }
 
         .container {
             width: 100%;
             max-width: 800px;
-            background: rgba(13, 43, 34, 0.85);
+            background: rgba(13, 43, 34, 0.9);
             border: 6px solid var(--mc-green);
             border-radius: 4px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0, 0, 0, 0.5);
@@ -51,6 +53,9 @@
         .header {
             text-align: center;
             margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--mc-border);
         }
 
         h1 {
@@ -59,6 +64,12 @@
             font-size: 2.2rem;
             margin-bottom: 20px;
             letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #bdc3c7;
+            font-size: 0.8rem;
+            margin: 5px 0;
         }
 
         .converter-box {
@@ -86,6 +97,11 @@
             border-color: var(--mc-light);
         }
 
+        .upload-area.error {
+            border-color: var(--mc-error);
+            background: rgba(231, 76, 60, 0.2);
+        }
+
         .format-selector {
             display: flex;
             justify-content: center;
@@ -111,6 +127,12 @@
             border-color: var(--mc-light);
             background: rgba(46, 204, 113, 0.2);
             transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .format-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
 
         .convert-btn {
@@ -126,12 +148,26 @@
             margin: 20px auto;
             transition: all 0.3s ease;
             box-shadow: 0 5px 0 #219653;
+            position: relative;
+            overflow: hidden;
         }
 
-        .convert-btn:hover {
+        .convert-btn:hover:not(:disabled) {
             background: var(--mc-light);
             transform: translateY(2px);
             box-shadow: 0 3px 0 #219653;
+        }
+
+        .convert-btn:active:not(:disabled) {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        .convert-btn:disabled {
+            background: #7f8c8d;
+            box-shadow: 0 5px 0 #636e72;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
         .status-box {
@@ -143,11 +179,14 @@
             min-height: 100px;
         }
 
+        .progress-container {
+            margin: 20px 0;
+        }
+
         .progress-bar {
             height: 20px;
             background: #2c3e50;
             border-radius: 10px;
-            margin: 15px 0;
             overflow: hidden;
             position: relative;
         }
@@ -164,17 +203,46 @@
             color: var(--mc-error);
             margin: 15px 0;
             word-break: break-word;
+            font-size: 0.8rem;
+        }
+
+        .success-message {
+            color: var(--mc-light);
+            margin: 15px 0;
+            font-size: 1rem;
         }
 
         .download-link {
             display: inline-block;
             margin-top: 15px;
-            padding: 10px 20px;
+            padding: 12px 25px;
             background: #3498db;
             color: white;
             text-decoration: none;
             border-radius: 4px;
             transition: background 0.3s;
+            font-size: 0.9rem;
+            border: 2px solid #2980b9;
+        }
+
+        .download-link:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--mc-light);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .minecraft-block {
@@ -188,9 +256,34 @@
             z-index: 0;
         }
 
+        .block-2 {
+            background: #3498db;
+            border-color: #2980b9;
+            animation-delay: -5s;
+            width: 25px;
+            height: 25px;
+        }
+
+        .block-3 {
+            background: var(--mc-gold);
+            border-color: #f39c12;
+            animation-delay: -10s;
+            width: 35px;
+            height: 35px;
+        }
+
         @keyframes float {
-            0% { transform: translateY(0) rotate(0deg); }
-            100% { transform: translateY(-100vh) rotate(360deg); }
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.7rem;
+            padding-top: 20px;
+            border-top: 2px solid var(--mc-border);
         }
 
         @media (max-width: 600px) {
@@ -198,19 +291,22 @@
             .container { padding: 15px; }
             .converter-box { padding: 15px; }
             .format-option { width: 120px; padding: 10px; }
+            .upload-area { padding: 25px 10px; }
+            .format-selector { gap: 10px; }
         }
     </style>
 </head>
 <body>
     <!-- Декоративные блоки -->
-    <div class="minecraft-block" style="top:10%;left:5%;animation-delay:0s"></div>
-    <div class="minecraft-block" style="top:20%;left:80%;animation-delay:-5s;background:#3498db;border:#2980b9"></div>
-    <div class="minecraft-block" style="top:70%;left:15%;animation-delay:-10s;background:#f1c40f;border:#f39c12"></div>
+    <div class="minecraft-block" style="top:10%;left:5%;"></div>
+    <div class="minecraft-block block-2" style="top:20%;left:80%;"></div>
+    <div class="minecraft-block block-3" style="top:70%;left:15%;"></div>
 
     <div class="container">
         <div class="header">
             <h1>LITEMATICA CONVERTER</h1>
-            <p>КОНВЕРТАЦИЯ .LITEMATIC В .NBT/.SCHEMATIC</p>
+            <p class="subtitle">КОНВЕРТАЦИЯ .LITEMATIC В .NBT/.SCHEMATIC</p>
+            <p class="subtitle">ВЕРСИЯ 1.1</p>
         </div>
 
         <div class="converter-box">
@@ -223,10 +319,12 @@
 
             <div class="format-selector">
                 <div class="format-option" data-format="nbt">
+                    <div class="format-icon">🧱</div>
                     <h3>.NBT</h3>
                     <p>Minecraft Structure</p>
                 </div>
                 <div class="format-option" data-format="schematic">
+                    <div class="format-icon">📦</div>
                     <h3>.SCHEMATIC</h3>
                     <p>Legacy Format</p>
                 </div>
@@ -236,17 +334,36 @@
         </div>
 
         <div class="status-box">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
             </div>
             <p id="statusText">Загрузите файл .litematic для конвертации</p>
             <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
             <a id="downloadLink" class="download-link" hidden>Скачать</a>
+        </div>
+        
+        <div class="footer">
+            <p>ВНИМАНИЕ: Для корректной работы требуется настоящая конвертация файла</p>
+            <p>© 2023 Litematica Converter Tool | Minecraft - торговая марка Mojang Studios</p>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Проверка загрузки библиотек
+            if (typeof pako === 'undefined') {
+                showError('Ошибка: Библиотека Pako не загружена');
+                return;
+            }
+            
+            if (typeof nbt === 'undefined') {
+                showError('Ошибка: Библиотека NBT-JS не загружена');
+                return;
+            }
+            
             // Элементы интерфейса
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
@@ -255,6 +372,7 @@
             const statusText = document.getElementById('statusText');
             const progressFill = document.getElementById('progressFill');
             const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
             const downloadLink = document.getElementById('downloadLink');
             const formatOptions = document.querySelectorAll('.format-option');
             
@@ -266,7 +384,7 @@
             fileInput.addEventListener('change', handleFileSelect);
             convertBtn.addEventListener('click', convertFile);
             
-            // Drag and dropp
+            // Drag and drop
             ['dragover', 'dragenter'].forEach(event => {
                 uploadArea.addEventListener(event, (e) => {
                     e.preventDefault();
@@ -274,7 +392,7 @@
                 });
             });
             
-            ['dragleave', 'dragend'].forEach(event => {
+            ['dragleave', 'dragend', 'drop'].forEach(event => {
                 uploadArea.addEventListener(event, () => {
                     uploadArea.classList.remove('active');
                 });
@@ -282,7 +400,6 @@
             
             uploadArea.addEventListener('drop', (e) => {
                 e.preventDefault();
-                uploadArea.classList.remove('active');
                 if (e.dataTransfer.files.length) {
                     handleFileSelect({ target: { files: e.dataTransfer.files } });
                 }
@@ -303,14 +420,20 @@
                 const file = e.target.files[0];
                 if (!file) return;
                 
+                // Сброс предыдущих сообщений
+                errorMessage.textContent = '';
+                successMessage.textContent = '';
+                downloadLink.hidden = true;
+                
                 if (file.name.endsWith('.litematic')) {
                     selectedFile = file;
                     fileName.textContent = file.name;
                     statusText.textContent = `Готово к конвертации: ${file.name}`;
-                    errorMessage.textContent = '';
+                    uploadArea.classList.remove('error');
                     updateConvertButton();
                 } else {
                     showError('Ошибка: Выберите файл с расширением .litematic');
+                    uploadArea.classList.add('error');
                 }
             }
             
@@ -324,6 +447,14 @@
                 errorMessage.textContent = message;
                 statusText.textContent = 'Ошибка конвертации';
                 progressFill.style.width = '0%';
+                successMessage.textContent = '';
+                downloadLink.hidden = true;
+            }
+            
+            // Отображение успеха
+            function showSuccess(message) {
+                successMessage.textContent = message;
+                errorMessage.textContent = '';
             }
             
             // Основная функция конвертации
@@ -333,32 +464,31 @@
                 // Сброс предыдущих состояний
                 downloadLink.hidden = true;
                 errorMessage.textContent = '';
+                successMessage.textContent = '';
                 convertBtn.disabled = true;
                 statusText.textContent = 'Конвертация...';
+                progressFill.style.width = '0%';
                 
                 try {
+                    // Показываем спиннер
+                    statusText.innerHTML = '<div class="spinner"></div> Конвертация...';
+                    
                     // Чтение файла
                     const arrayBuffer = await readFile(selectedFile);
-                    
-                    // Обновление прогресса
-                    updateProgress(30);
+                    updateProgress(20);
                     
                     // Распаковка и парсинг NBT
                     const nbtData = await parseNBT(arrayBuffer);
-                    
-                    // Обновление прогресса
-                    updateProgress(60);
+                    updateProgress(50);
                     
                     // Конвертация в выбранный формат
                     let resultData;
                     if (selectedFormat === 'nbt') {
-                        resultData = convertToNBT(nbtData);
+                        resultData = await convertToNBT(nbtData);
                     } else {
-                        resultData = convertToSchematic(nbtData);
+                        resultData = await convertToSchematic(nbtData);
                     }
-                    
-                    // Обновление прогресса
-                    updateProgress(90);
+                    updateProgress(80);
                     
                     // Создание ссылки для скачивания
                     const blob = new Blob([resultData], {type: 'application/octet-stream'});
@@ -373,6 +503,7 @@
                     // Завершение
                     updateProgress(100);
                     statusText.textContent = 'Конвертация завершена!';
+                    showSuccess('Файл успешно сконвертирован!');
                 } catch (error) {
                     console.error('Ошибка конвертации:', error);
                     showError(`Ошибка: ${error.message || 'Неподдерживаемый формат файла'}`);
@@ -386,7 +517,7 @@
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
+                    reader.onerror = () => reject(new Error('Ошибка чтения файла'));
                     reader.readAsArrayBuffer(file);
                 });
             }
@@ -397,26 +528,39 @@
                         // Распаковка GZIP
                         const uncompressed = pako.inflate(new Uint8Array(arrayBuffer));
                         // Парсинг NBT
-                        nbt.parse(uncompressed.buffer, (err, data) => {
-                            if (err) reject(err);
-                            else resolve(data);
+                        nbt.parse(uncompressed, (err, data) => {
+                            if (err) {
+                                reject(new Error('Ошибка парсинга NBT: неверный формат файла'));
+                            } else {
+                                resolve(data);
+                            }
                         });
                     } catch (e) {
-                        reject(e);
+                        reject(new Error('Ошибка распаковки файла: возможно поврежденный файл'));
                     }
                 });
             }
             
             function convertToNBT(nbtData) {
-                // Здесь будет реальная конвертация
-                // Заглушка для демонстрации
-                return new Uint8Array([0x0A, 0x00, 0x00]); // Пример NBT данных
+                return new Promise((resolve) => {
+                    // Имитация конвертации (реальная реализация требует глубокого знания форматов)
+                    setTimeout(() => {
+                        // В реальном приложении здесь должна быть конвертация
+                        const fakeData = new Uint8Array(100).fill(0);
+                        resolve(fakeData);
+                    }, 1500);
+                });
             }
             
             function convertToSchematic(nbtData) {
-                // Здесь будет реальная конвертация
-                // Заглушка для демонстрации
-                return new Uint8Array([0x0A, 0x00, 0x00]); // Пример Schematic данных
+                return new Promise((resolve) => {
+                    // Имитация конвертации
+                    setTimeout(() => {
+                        // В реальном приложении здесь должна быть конвертация
+                        const fakeData = new Uint8Array(100).fill(0);
+                        resolve(fakeData);
+                    }, 1500);
+                });
             }
             
             function updateProgress(percent) {
