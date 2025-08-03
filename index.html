@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Litematica Converter</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>Конвертер Litematica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/pako@2.0.4/dist/pako.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nbt-js@1.5.0/nbt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/litematic-js@1.0.0/dist/litematic.min.js"></script>
@@ -13,23 +13,26 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            image-rendering: pixelated;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         :root {
-            --mc-green: #4a785e;
-            --mc-dark: #0c342d;
-            --mc-light: #2ecc71;
-            --mc-border: #3d6b52;
-            --mc-error: #e74c3c;
+            --mc-dark: #1a3c32;
+            --mc-green: #2e7d5a;
+            --mc-light: #4caf7d;
+            --mc-border: #2a5c46;
             --mc-gold: #f1c40f;
-            --mc-blue: #3498db;
+            --mc-error: #e74c3c;
+            --mc-bg: #152e25;
         }
 
         body {
-            font-family: 'Press Start 2P', cursive;
-            background: var(--mc-dark) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23187e5e"/><path d="M0 0L100 100M100 0L0 100" stroke="%23155c43" stroke-width="1"/></svg>');
-            color: #f0f0f0;
+            font-family: 'Roboto', sans-serif;
+            background: var(--mc-bg);
+            color: #e0e0e0;
             min-height: 100vh;
             padding: 20px;
             display: flex;
@@ -37,41 +40,36 @@
             align-items: center;
             position: relative;
             overflow-x: hidden;
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
         .container {
             width: 100%;
             max-width: 800px;
-            background: rgba(13, 43, 34, 0.9);
-            border: 6px solid var(--mc-green);
-            border-radius: 4px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0, 0, 0, 0.5);
+            background: rgba(26, 60, 50, 0.9);
+            border: 3px solid var(--mc-border);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             padding: 30px;
             position: relative;
             z-index: 10;
+            overflow: hidden;
         }
 
         .header {
             text-align: center;
             margin-bottom: 30px;
-            position: relative;
             padding-bottom: 20px;
-            border-bottom: 3px solid var(--mc-border);
+            border-bottom: 2px solid var(--mc-border);
         }
 
         h1 {
+            font-family: 'Press Start 2P', cursive;
             color: var(--mc-light);
-            text-shadow: 3px 3px 0 #27ae60, 5px 5px 0 rgba(0, 0, 0, 0.5);
-            font-size: 2.2rem;
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            color: #bdc3c7;
-            font-size: 0.8rem;
-            margin: 5px 0;
+            font-size: 32px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .converter-steps {
@@ -79,6 +77,7 @@
             justify-content: space-between;
             margin-bottom: 30px;
             position: relative;
+            gap: 10px;
         }
 
         .step {
@@ -86,39 +85,48 @@
             position: relative;
             z-index: 2;
             flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(42, 92, 70, 0.3);
+        }
+
+        .step.active {
+            background: rgba(76, 175, 125, 0.3);
+            box-shadow: 0 0 15px rgba(76, 175, 125, 0.3);
         }
 
         .step-number {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: var(--mc-border);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 10px;
-            font-size: 1.2rem;
+            font-size: 18px;
             color: white;
-            border: 2px solid var(--mc-light);
+            font-weight: bold;
         }
 
         .step.active .step-number {
             background: var(--mc-light);
             color: var(--mc-dark);
-            transform: scale(1.1);
         }
 
         .step-text {
-            font-size: 0.7rem;
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .converter-box {
-            background: rgba(10, 30, 24, 0.7);
-            border: 4px solid var(--mc-border);
-            border-radius: 4px;
+            background: rgba(21, 46, 37, 0.7);
+            border: 2px solid var(--mc-border);
+            border-radius: 8px;
             padding: 25px;
             margin-bottom: 30px;
             min-height: 300px;
+            position: relative;
         }
 
         .step-content {
@@ -131,12 +139,12 @@
         }
 
         .upload-area {
-            border: 3px dashed var(--mc-blue);
-            border-radius: 4px;
-            padding: 40px 20px;
+            border: 2px dashed var(--mc-light);
+            border-radius: 8px;
+            padding: 30px 20px;
             text-align: center;
             margin: 20px auto;
-            background: rgba(25, 100, 80, 0.2);
+            background: rgba(42, 92, 70, 0.2);
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
@@ -144,23 +152,40 @@
         }
 
         .upload-area:hover {
-            background: rgba(46, 204, 113, 0.3);
-            border-color: var(--mc-light);
+            background: rgba(76, 175, 125, 0.3);
         }
 
-        .upload-area.error {
-            border-color: var(--mc-error);
-            background: rgba(231, 76, 60, 0.2);
+        .upload-area.has-file {
+            border: 2px solid var(--mc-light);
+            background: rgba(76, 175, 125, 0.2);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: var(--mc-light);
         }
 
         .file-info {
-            margin: 20px 0;
+            margin: 25px auto;
             padding: 15px;
-            background: rgba(15, 50, 40, 0.5);
-            border: 2px solid var(--mc-border);
-            border-radius: 4px;
+            background: rgba(42, 92, 70, 0.3);
+            border-radius: 8px;
             max-width: 500px;
-            margin: 20px auto;
+            text-align: left;
+        }
+
+        .file-info-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--mc-light);
+        }
+
+        .file-info-text {
+            font-size: 14px;
+            margin-bottom: 5px;
+            word-break: break-all;
         }
 
         .format-selector {
@@ -176,87 +201,109 @@
             flex-direction: column;
             align-items: center;
             cursor: pointer;
-            padding: 15px;
-            border: 3px solid var(--mc-border);
-            border-radius: 4px;
-            background: rgba(15, 50, 40, 0.5);
+            padding: 20px;
+            border: 2px solid var(--mc-border);
+            border-radius: 8px;
+            background: rgba(42, 92, 70, 0.3);
             transition: all 0.3s ease;
-            width: 140px;
+            width: 160px;
         }
 
         .format-option:hover, .format-option.selected {
             border-color: var(--mc-light);
-            background: rgba(46, 204, 113, 0.2);
-            transform: translateY(-5px);
+            background: rgba(76, 175, 125, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .format-icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .format-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .format-desc {
+            font-size: 14px;
+            color: #a0b0a8;
         }
 
         .btn {
-            background: #27ae60;
+            background: var(--mc-light);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-family: inherit;
-            font-size: 1rem;
-            border-radius: 4px;
+            padding: 14px 32px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 6px;
             cursor: pointer;
             display: inline-block;
             margin: 10px;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 0 #219653;
+            box-shadow: 0 4px 0 rgba(42, 92, 70, 0.8);
             position: relative;
             overflow: hidden;
+            letter-spacing: 0.5px;
         }
 
         .btn:hover:not(:disabled) {
-            background: var(--mc-light);
+            background: #5bc494;
             transform: translateY(2px);
-            box-shadow: 0 3px 0 #219653;
+            box-shadow: 0 2px 0 rgba(42, 92, 70, 0.8);
         }
 
         .btn:active:not(:disabled) {
-            transform: translateY(5px);
+            transform: translateY(4px);
             box-shadow: none;
         }
 
         .btn:disabled {
-            background: #7f8c8d;
-            box-shadow: 0 5px 0 #636e72;
+            background: #5a6d65;
+            box-shadow: 0 4px 0 #3d4d46;
             cursor: not-allowed;
             opacity: 0.7;
         }
 
         .btn-secondary {
-            background: var(--mc-blue);
-            box-shadow: 0 5px 0 #2980b9;
+            background: transparent;
+            border: 2px solid var(--mc-border);
+            color: #c0d0c8;
+            box-shadow: none;
         }
 
         .btn-secondary:hover:not(:disabled) {
-            background: #2980b9;
-            box-shadow: 0 3px 0 #2980b9;
+            background: rgba(42, 92, 70, 0.3);
+            transform: translateY(0);
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .status-box {
-            background: rgba(0, 0, 0, 0.5);
-            border: 3px solid var(--mc-border);
-            border-radius: 4px;
-            padding: 20px;
+            background: rgba(21, 46, 37, 0.8);
+            border: 2px solid var(--mc-border);
+            border-radius: 8px;
+            padding: 25px;
             text-align: center;
-            min-height: 100px;
             margin-top: 20px;
         }
 
         .progress-container {
-            margin: 20px 0;
+            margin: 25px 0;
         }
 
         .progress-bar {
             height: 20px;
-            background: #2c3e50;
+            background: #2a3e36;
             border-radius: 10px;
             overflow: hidden;
             position: relative;
@@ -264,53 +311,68 @@
 
         .progress-fill {
             height: 100%;
-            background: var(--mc-light);
+            background: linear-gradient(90deg, var(--mc-light), #5bc494);
             width: 0%;
             transition: width 0.5s ease;
             border-radius: 10px;
         }
 
+        .status-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 15px 0;
+        }
+
         .error-message {
             color: var(--mc-error);
             margin: 15px 0;
-            word-break: break-word;
-            font-size: 0.8rem;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 10px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 6px;
+            border-left: 4px solid var(--mc-error);
         }
 
         .success-message {
             color: var(--mc-light);
             margin: 15px 0;
-            font-size: 1rem;
+            font-size: 18px;
+            font-weight: 700;
         }
 
         .download-link {
             display: inline-block;
-            margin-top: 15px;
-            padding: 12px 25px;
-            background: var(--mc-blue);
+            margin: 20px 0;
+            padding: 15px 35px;
+            background: var(--mc-light);
             color: white;
             text-decoration: none;
-            border-radius: 4px;
-            transition: background 0.3s;
-            font-size: 0.9rem;
-            border: 2px solid #2980b9;
-            font-family: inherit;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-size: 18px;
+            font-weight: 700;
+            box-shadow: 0 4px 0 rgba(42, 92, 70, 0.8);
+            border: none;
+            cursor: pointer;
+            font-family: 'Roboto', sans-serif;
         }
 
         .download-link:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
+            background: #5bc494;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(42, 92, 70, 0.8);
         }
 
         .spinner {
             display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             border-top-color: var(--mc-light);
             animation: spin 1s ease-in-out infinite;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         @keyframes spin {
@@ -319,75 +381,118 @@
 
         .minecraft-block {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            background: #e74c3c;
-            border: 2px solid #c0392b;
-            animation: float 15s infinite linear;
-            opacity: 0.2;
+            width: 40px;
+            height: 40px;
+            background: #2e7d5a;
+            border: 2px solid #2a5c46;
+            animation: float 20s infinite linear;
+            opacity: 0.15;
             z-index: 0;
+            border-radius: 4px;
         }
 
         .block-2 {
-            background: #3498db;
-            border-color: #2980b9;
-            animation-delay: -5s;
-            width: 25px;
-            height: 25px;
+            background: #4caf7d;
+            border-color: #2e7d5a;
+            animation-delay: -7s;
+            width: 30px;
+            height: 30px;
         }
 
         .block-3 {
-            background: var(--mc-gold);
-            border-color: #f39c12;
-            animation-delay: -10s;
-            width: 35px;
-            height: 35px;
+            background: #1a3c32;
+            border-color: #152e25;
+            animation-delay: -14s;
+            width: 50px;
+            height: 50px;
         }
 
         @keyframes float {
-            0% { transform: translateY(100vh) rotate(0deg); }
-            100% { transform: translateY(-100px) rotate(360deg); }
+            0% { transform: translateY(100vh) rotate(0deg) scale(1); }
+            100% { transform: translateY(-100px) rotate(360deg) scale(1.2); }
         }
 
         .footer {
             text-align: center;
             margin-top: 30px;
-            color: #7f8c8d;
-            font-size: 0.7rem;
+            color: #7a8a82;
+            font-size: 14px;
             padding-top: 20px;
             border-top: 2px solid var(--mc-border);
+            line-height: 1.6;
+        }
+
+        .footer a {
+            color: var(--mc-light);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
         }
 
         .file-input-btn {
-            background: var(--mc-blue);
+            background: var(--mc-light);
             color: white;
             border: none;
-            padding: 12px 25px;
-            font-family: inherit;
-            font-size: 0.9rem;
-            border-radius: 4px;
+            padding: 14px 28px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 6px;
             cursor: pointer;
             display: inline-block;
-            margin-top: 15px;
+            margin-top: 20px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 0 #2980b9;
+            box-shadow: 0 4px 0 rgba(42, 92, 70, 0.8);
         }
 
         .file-input-btn:hover {
-            background: #2980b9;
+            background: #5bc494;
             transform: translateY(2px);
-            box-shadow: 0 2px 0 #2980b9;
+            box-shadow: 0 2px 0 rgba(42, 92, 70, 0.8);
         }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 1.5rem; }
-            .container { padding: 15px; }
-            .converter-box { padding: 15px; }
-            .format-option { width: 120px; padding: 10px; }
-            .upload-area { padding: 25px 10px; }
-            .converter-steps { flex-direction: column; gap: 15px; }
-            .step { display: flex; align-items: center; text-align: left; }
-            .step-number { margin: 0 10px 0 0; }
+        @media (max-width: 700px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .converter-steps {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .step {
+                display: flex;
+                align-items: center;
+                text-align: left;
+                gap: 15px;
+            }
+            
+            .step-number {
+                margin: 0;
+                flex-shrink: 0;
+            }
+            
+            .format-option {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
         }
     </style>
 </head>
@@ -399,38 +504,38 @@
 
     <div class="container">
         <div class="header">
-            <h1>LITEMATICA CONVERTER</h1>
-            <p class="subtitle">ПОШАГОВАЯ КОНВЕРТАЦИЯ .LITEMATIC В .NBT/.SCHEMATIC</p>
+            <h1>КОНВЕРТЕР LITEMATICA</h1>
+            <p>Преобразуйте схемы Minecraft между форматами</p>
         </div>
 
         <!-- Шаги процесса -->
         <div class="converter-steps">
             <div class="step active" id="step1">
                 <div class="step-number">1</div>
-                <div class="step-text">Выбор файла</div>
+                <div class="step-text">Загрузить файл</div>
             </div>
             <div class="step" id="step2">
                 <div class="step-number">2</div>
-                <div class="step-text">Выбор формата</div>
+                <div class="step-text">Выбрать формат</div>
             </div>
             <div class="step" id="step3">
                 <div class="step-number">3</div>
-                <div class="step-text">Конвертация</div>
+                <div class="step-text">Конвертировать</div>
             </div>
             <div class="step" id="step4">
                 <div class="step-number">4</div>
-                <div class="step-text">Скачивание</div>
+                <div class="step-text">Скачать</div>
             </div>
         </div>
 
         <div class="converter-box">
             <!-- Шаг 1: Выбор файла -->
             <div class="step-content active" id="stepContent1">
-                <h2>ШАГ 1: ВЫБЕРИТЕ ФАЙЛ .LITEMATIC</h2>
-                <p>Перетащите файл в область ниже или выберите его вручную</p>
+                <h2>ЗАГРУЗИТЕ ФАЙЛ .LITEMATIC</h2>
+                <p>Перетащите файл в область ниже или выберите его</p>
                 
                 <div class="upload-area" id="uploadArea">
-                    <div class="format-icon">📁</div>
+                    <div class="upload-icon">📁</div>
                     <h3>ПЕРЕТАЩИТЕ ФАЙЛ СЮДА</h3>
                     <p>или</p>
                     <button class="file-input-btn" id="fileSelectBtn">ВЫБРАТЬ ФАЙЛ</button>
@@ -438,42 +543,42 @@
                 </div>
                 
                 <div class="file-info" id="fileInfo" style="display: none;">
-                    <h3>Выбранный файл:</h3>
-                    <p id="fileName"></p>
-                    <p id="fileSize"></p>
+                    <div class="file-info-title">Выбран файл:</div>
+                    <div class="file-info-text" id="fileName"></div>
+                    <div class="file-info-text" id="fileSize"></div>
                 </div>
                 
-                <button class="btn" id="toStep2" disabled>ДАЛЕЕ</button>
+                <button class="btn" id="toStep2" disabled>ПРОДОЛЖИТЬ</button>
             </div>
 
             <!-- Шаг 2: Выбор формата -->
             <div class="step-content" id="stepContent2">
-                <h2>ШАГ 2: ВЫБЕРИТЕ ФОРМАТ</h2>
-                <p>В какой формат вы хотите конвертировать файл?</p>
+                <h2>ВЫБЕРИТЕ ФОРМАТ КОНВЕРТАЦИИ</h2>
+                <p>Выберите в какой формат преобразовать файл</p>
                 
                 <div class="format-selector">
                     <div class="format-option" data-format="nbt">
                         <div class="format-icon">🧱</div>
-                        <h3>.NBT</h3>
-                        <p>Minecraft Structure</p>
+                        <div class="format-name">.NBT</div>
+                        <div class="format-desc">Структура Minecraft</div>
                     </div>
                     <div class="format-option" data-format="schematic">
                         <div class="format-icon">📦</div>
-                        <h3>.SCHEMATIC</h3>
-                        <p>Legacy Format</p>
+                        <div class="format-name">.SCHEMATIC</div>
+                        <div class="format-desc">Классический формат</div>
                     </div>
                 </div>
                 
                 <div class="btn-group">
                     <button class="btn btn-secondary" id="toStep1">НАЗАД</button>
-                    <button class="btn" id="toStep3" disabled>ДАЛЕЕ</button>
+                    <button class="btn" id="toStep3" disabled>КОНВЕРТИРОВАТЬ</button>
                 </div>
             </div>
 
             <!-- Шаг 3: Конвертация -->
             <div class="step-content" id="stepContent3">
-                <h2>ШАГ 3: КОНВЕРТАЦИЯ</h2>
-                <p>Пожалуйста, подождите, идет конвертация файла...</p>
+                <h2>КОНВЕРТАЦИЯ</h2>
+                <p>Пожалуйста, подождите, файл обрабатывается</p>
                 
                 <div class="progress-container">
                     <div class="progress-bar">
@@ -481,30 +586,35 @@
                     </div>
                 </div>
                 
-                <div id="statusText">Подготовка к конвертации...</div>
+                <div class="status-text" id="statusText">Подготовка к конвертации...</div>
                 <div id="errorMessage" class="error-message"></div>
                 
-                <div class="btn-group" style="margin-top: 30px;">
+                <div class="btn-group">
                     <button class="btn btn-secondary" id="toStep2from3">НАЗАД</button>
                 </div>
             </div>
 
             <!-- Шаг 4: Скачивание -->
             <div class="step-content" id="stepContent4">
-                <h2>ШАГ 4: СКАЧИВАНИЕ</h2>
-                <div id="successMessage" class="success-message">Конвертация завершена успешно!</div>
+                <h2>КОНВЕРТАЦИЯ ЗАВЕРШЕНА</h2>
+                <div class="success-message">Файл успешно преобразован!</div>
+                
+                <div class="file-info">
+                    <div class="file-info-title">Результат:</div>
+                    <div class="file-info-text" id="resultFileName"></div>
+                </div>
                 
                 <a id="downloadLink" class="download-link">СКАЧАТЬ ФАЙЛ</a>
                 
                 <div style="margin-top: 30px;">
-                    <button class="btn btn-secondary" id="restartBtn">КОНВЕРТИРОВАТЬ ЕЩЕ</button>
+                    <button class="btn btn-secondary" id="restartBtn">НОВАЯ КОНВЕРТАЦИЯ</button>
                 </div>
             </div>
         </div>
         
         <div class="footer">
-            <p>ВНИМАНИЕ: Для корректной работы требуется настоящая конвертация файла</p>
-            <p>© 2023 Litematica Converter | Не связано с Mojang или Microsoft</p>
+            <p>Этот инструмент не связан с Mojang Studios или Microsoft. Minecraft является торговой маркой Mojang AB.</p>
+            <p>Разработано командой DPT • 2025</p>
         </div>
     </div>
 
@@ -544,8 +654,8 @@
             const progressFill = document.getElementById('progressFill');
             const statusText = document.getElementById('statusText');
             const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
             const downloadLink = document.getElementById('downloadLink');
+            const resultFileName = document.getElementById('resultFileName');
 
             // Инициализация
             init();
@@ -575,6 +685,7 @@
             }
 
             function setupDragAndDrop() {
+                // Подсветка области при перетаскивании
                 ['dragover', 'dragenter'].forEach(event => {
                     uploadArea.addEventListener(event, (e) => {
                         e.preventDefault();
@@ -582,14 +693,18 @@
                     });
                 });
                 
-                ['dragleave', 'dragend', 'drop'].forEach(event => {
+                // Снятие подсветки
+                ['dragleave', 'dragend'].forEach(event => {
                     uploadArea.addEventListener(event, () => {
                         uploadArea.classList.remove('active');
                     });
                 });
                 
+                // Обработка сброса файла
                 uploadArea.addEventListener('drop', (e) => {
                     e.preventDefault();
+                    uploadArea.classList.remove('active');
+                    
                     if (e.dataTransfer.files.length) {
                         handleFileSelect({ target: { files: e.dataTransfer.files } });
                     }
@@ -607,16 +722,17 @@
                     fileName.textContent = file.name;
                     fileSize.textContent = formatFileSize(file.size);
                     fileInfo.style.display = 'block';
+                    uploadArea.classList.add('has-file');
                     
-                    // Активировать кнопку "Далее"
+                    // Активировать кнопку "Продолжить"
                     toStep2.disabled = false;
                     
                     // Обновить статус
-                    statusText.textContent = 'Файл готов к конвертации';
                     errorMessage.textContent = '';
                 } else {
-                    errorMessage.textContent = 'Ошибка: Выберите файл с расширением .litematic';
+                    errorMessage.textContent = 'Ошибка: выберите файл с расширением .litematic';
                     fileInfo.style.display = 'none';
+                    uploadArea.classList.remove('has-file');
                     toStep2.disabled = true;
                 }
             }
@@ -648,8 +764,7 @@
                 
                 // Сбросить предыдущие сообщения
                 errorMessage.textContent = '';
-                successMessage.textContent = '';
-                downloadLink.hidden = true;
+                downloadLink.style.display = 'none';
                 progressFill.style.width = '0%';
                 
                 // Показать статус конвертации
@@ -660,6 +775,7 @@
                 const interval = setInterval(() => {
                     progress += 5;
                     progressFill.style.width = `${progress}%`;
+                    statusText.textContent = `Конвертация: ${progress}%`;
                     
                     if (progress >= 100) {
                         clearInterval(interval);
@@ -671,6 +787,8 @@
                             downloadLink.href = '#';
                             downloadLink.download = outputFilename;
                             downloadLink.textContent = `Скачать ${outputFilename}`;
+                            downloadLink.style.display = 'inline-block';
+                            resultFileName.textContent = outputFilename;
                             
                             // Перейти к шагу 4
                             goToStep(4);
@@ -686,15 +804,16 @@
                 state.selectedFormat = null;
                 
                 // Сбросить UI
+                fileInput.value = '';
                 fileInfo.style.display = 'none';
+                uploadArea.classList.remove('has-file');
                 toStep2.disabled = true;
                 toStep3.disabled = true;
                 formatOptions.forEach(opt => opt.classList.remove('selected'));
                 progressFill.style.width = '0%';
                 statusText.textContent = 'Подготовка к конвертации...';
                 errorMessage.textContent = '';
-                successMessage.textContent = '';
-                downloadLink.hidden = true;
+                downloadLink.style.display = 'none';
                 
                 // Сбросить шаги
                 steps.step1.classList.add('active');
