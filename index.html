@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Litematica Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.0.4/dist/pako.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nbt-js@1.5.0/nbt.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: pixelated;
+        }
+
+        :root {
+            --mc-green: #4a785e;
+            --mc-dark: #0c342d;
+            --mc-light: #2ecc71;
+            --mc-border: #3d6b52;
+            --mc-error: #e74c3c;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: var(--mc-dark) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23187e5e"/><path d="M0 0L100 100M100 0L0 100" stroke="%23155c43" stroke-width="1"/></svg>');
+            color: #f0f0f0;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(13, 43, 34, 0.85);
+            border: 6px solid var(--mc-green);
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7), inset 0 0 10px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--mc-light);
+            text-shadow: 3px 3px 0 #27ae60, 5px 5px 0 rgba(0, 0, 0, 0.5);
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .converter-box {
+            background: rgba(10, 30, 24, 0.7);
+            border: 4px solid var(--mc-border);
+            border-radius: 4px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 4px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            background: rgba(25, 100, 80, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upload-area.active {
+            background: rgba(46, 204, 113, 0.3);
+            border-color: var(--mc-light);
+        }
+
+        .format-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .format-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 15px;
+            border: 3px solid var(--mc-border);
+            border-radius: 4px;
+            background: rgba(15, 50, 40, 0.5);
+            transition: all 0.3s ease;
+            width: 140px;
+        }
+
+        .format-option.selected {
+            border-color: var(--mc-light);
+            background: rgba(46, 204, 113, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .convert-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-family: inherit;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 0 #219653;
+        }
+
+        .convert-btn:hover {
+            background: var(--mc-light);
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #219653;
+        }
+
+        .status-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid var(--mc-border);
+            border-radius: 4px;
+            padding: 20px;
+            text-align: center;
+            min-height: 100px;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: #2c3e50;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--mc-light);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .error-message {
+            color: var(--mc-error);
+            margin: 15px 0;
+            word-break: break-word;
+        }
+
+        .download-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .minecraft-block {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #e74c3c;
+            border: 2px solid #c0392b;
+            animation: float 15s infinite linear;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5rem; }
+            .container { padding: 15px; }
+            .converter-box { padding: 15px; }
+            .format-option { width: 120px; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Декоративные блоки -->
+    <div class="minecraft-block" style="top:10%;left:5%;animation-delay:0s"></div>
+    <div class="minecraft-block" style="top:20%;left:80%;animation-delay:-5s;background:#3498db;border:#2980b9"></div>
+    <div class="minecraft-block" style="top:70%;left:15%;animation-delay:-10s;background:#f1c40f;border:#f39c12"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>LITEMATICA CONVERTER</h1>
+            <p>КОНВЕРТАЦИЯ .LITEMATIC В .NBT/.SCHEMATIC</p>
+        </div>
+
+        <div class="converter-box">
+            <div class="upload-area" id="uploadArea">
+                <h2>ПЕРЕТАЩИТЕ ФАЙЛ .LITEMATIC</h2>
+                <p>или нажмите для выбора файла</p>
+                <p id="fileName"></p>
+                <input type="file" id="fileInput" accept=".litematic" hidden>
+            </div>
+
+            <div class="format-selector">
+                <div class="format-option" data-format="nbt">
+                    <h3>.NBT</h3>
+                    <p>Minecraft Structure</p>
+                </div>
+                <div class="format-option" data-format="schematic">
+                    <h3>.SCHEMATIC</h3>
+                    <p>Legacy Format</p>
+                </div>
+            </div>
+
+            <button class="convert-btn" id="convertBtn" disabled>КОНВЕРТИРОВАТЬ</button>
+        </div>
+
+        <div class="status-box">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p id="statusText">Загрузите файл .litematic для конвертации</p>
+            <div id="errorMessage" class="error-message"></div>
+            <a id="downloadLink" class="download-link" hidden>Скачать</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Элементы интерфейса
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName');
+            const convertBtn = document.getElementById('convertBtn');
+            const statusText = document.getElementById('statusText');
+            const progressFill = document.getElementById('progressFill');
+            const errorMessage = document.getElementById('errorMessage');
+            const downloadLink = document.getElementById('downloadLink');
+            const formatOptions = document.querySelectorAll('.format-option');
+            
+            let selectedFile = null;
+            let selectedFormat = null;
+            
+            // Обработчики событий
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
+            convertBtn.addEventListener('click', convertFile);
+            
+            // Drag and drop
+            ['dragover', 'dragenter'].forEach(event => {
+                uploadArea.addEventListener(event, (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('active');
+                });
+            });
+            
+            ['dragleave', 'dragend'].forEach(event => {
+                uploadArea.addEventListener(event, () => {
+                    uploadArea.classList.remove('active');
+                });
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('active');
+                if (e.dataTransfer.files.length) {
+                    handleFileSelect({ target: { files: e.dataTransfer.files } });
+                }
+            });
+            
+            // Выбор формата
+            formatOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    formatOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedFormat = option.dataset.format;
+                    updateConvertButton();
+                });
+            });
+            
+            // Обработка выбора файла
+            function handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                if (file.name.endsWith('.litematic')) {
+                    selectedFile = file;
+                    fileName.textContent = file.name;
+                    statusText.textContent = `Готово к конвертации: ${file.name}`;
+                    errorMessage.textContent = '';
+                    updateConvertButton();
+                } else {
+                    showError('Ошибка: Выберите файл с расширением .litematic');
+                }
+            }
+            
+            // Обновление состояния кнопки
+            function updateConvertButton() {
+                convertBtn.disabled = !(selectedFile && selectedFormat);
+            }
+            
+            // Отображение ошибок
+            function showError(message) {
+                errorMessage.textContent = message;
+                statusText.textContent = 'Ошибка конвертации';
+                progressFill.style.width = '0%';
+            }
+            
+            // Основная функция конвертации
+            async function convertFile() {
+                if (!selectedFile || !selectedFormat) return;
+                
+                // Сброс предыдущих состояний
+                downloadLink.hidden = true;
+                errorMessage.textContent = '';
+                convertBtn.disabled = true;
+                statusText.textContent = 'Конвертация...';
+                
+                try {
+                    // Чтение файла
+                    const arrayBuffer = await readFile(selectedFile);
+                    
+                    // Обновление прогресса
+                    updateProgress(30);
+                    
+                    // Распаковка и парсинг NBT
+                    const nbtData = await parseNBT(arrayBuffer);
+                    
+                    // Обновление прогресса
+                    updateProgress(60);
+                    
+                    // Конвертация в выбранный формат
+                    let resultData;
+                    if (selectedFormat === 'nbt') {
+                        resultData = convertToNBT(nbtData);
+                    } else {
+                        resultData = convertToSchematic(nbtData);
+                    }
+                    
+                    // Обновление прогресса
+                    updateProgress(90);
+                    
+                    // Создание ссылки для скачивания
+                    const blob = new Blob([resultData], {type: 'application/octet-stream'});
+                    const url = URL.createObjectURL(blob);
+                    const outputFilename = selectedFile.name.replace('.litematic', `.${selectedFormat}`);
+                    
+                    downloadLink.href = url;
+                    downloadLink.download = outputFilename;
+                    downloadLink.textContent = `Скачать ${outputFilename}`;
+                    downloadLink.hidden = false;
+                    
+                    // Завершение
+                    updateProgress(100);
+                    statusText.textContent = 'Конвертация завершена!';
+                } catch (error) {
+                    console.error('Ошибка конвертации:', error);
+                    showError(`Ошибка: ${error.message || 'Неподдерживаемый формат файла'}`);
+                } finally {
+                    convertBtn.disabled = false;
+                }
+            }
+            
+            // Вспомогательные функции
+            function readFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+            
+            function parseNBT(arrayBuffer) {
+                return new Promise((resolve, reject) => {
+                    try {
+                        // Распаковка GZIP
+                        const uncompressed = pako.inflate(new Uint8Array(arrayBuffer));
+                        // Парсинг NBT
+                        nbt.parse(uncompressed.buffer, (err, data) => {
+                            if (err) reject(err);
+                            else resolve(data);
+                        });
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            }
+            
+            function convertToNBT(nbtData) {
+                // Здесь будет реальная конвертация
+                // Заглушка для демонстрации
+                return new Uint8Array([0x0A, 0x00, 0x00]); // Пример NBT данных
+            }
+            
+            function convertToSchematic(nbtData) {
+                // Здесь будет реальная конвертация
+                // Заглушка для демонстрации
+                return new Uint8Array([0x0A, 0x00, 0x00]); // Пример Schematic данных
+            }
+            
+            function updateProgress(percent) {
+                progressFill.style.width = `${percent}%`;
+            }
+        });
+    </script>
+</body>
+</html>
