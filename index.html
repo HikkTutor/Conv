@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Конвертер Litematica</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Добавляем необходимые библиотеки -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismarine-nbt@2.0.0/browser.js"></script>
     <style>
         * {
             margin: 0;
@@ -38,7 +41,7 @@
             align-items: center;
             overflow-x: hidden;
             line-height: 1.5;
-            overflow-y: scroll; /* Фиксируем скроллбар */
+            overflow-y: scroll;
         }
 
         .container {
@@ -572,7 +575,6 @@
             }
         }
 
-        /* Анимация перехода между шагами */
         .step-content {
             animation: fadeInMove 0.5s ease;
         }
@@ -584,7 +586,6 @@
     </style>
 </head>
 <body>
-    <!-- Декоративные блоки -->
     <div class="minecraft-block" style="top:10%;left:5%;"></div>
     <div class="minecraft-block block-2" style="top:20%;left:80%;"></div>
     <div class="minecraft-block block-3" style="top:70%;left:15%;"></div>
@@ -595,7 +596,6 @@
             <p>Преобразуйте схемы Minecraft между форматами</p>
         </div>
 
-        <!-- Шаги процесса -->
         <div class="converter-steps">
             <div class="step active" id="step1">
                 <div class="step-number">1</div>
@@ -689,6 +689,7 @@
                 <div class="file-info">
                     <div class="file-info-title">Результат:</div>
                     <div class="file-info-text" id="resultFileName"></div>
+                    <div class="file-info-text" id="fileSizeInfo"></div>
                 </div>
                 
                 <a id="downloadLink" class="download-link">СКАЧАТЬ ФАЙЛ</a>
@@ -711,7 +712,8 @@
             const state = {
                 currentStep: 1,
                 selectedFile: null,
-                selectedFormat: null
+                selectedFormat: null,
+                convertedData: null
             };
 
             // Элементы интерфейса
@@ -743,12 +745,12 @@
             const errorMessage = document.getElementById('errorMessage');
             const downloadLink = document.getElementById('downloadLink');
             const resultFileName = document.getElementById('resultFileName');
+            const fileSizeInfo = document.getElementById('fileSizeInfo');
 
             // Инициализация
             init();
 
             function init() {
-                // Настройка обработчиков событий
                 fileSelectBtn.addEventListener('click', () => fileInput.click());
                 fileInput.addEventListener('change', handleFileSelect);
                 toStep2.addEventListener('click', () => goToStep(2));
@@ -757,10 +759,8 @@
                 toStep2from3.addEventListener('click', () => goToStep(2));
                 restartBtn.addEventListener('click', resetConverter);
                 
-                // Drag and drop
                 setupDragAndDrop();
                 
-                // Выбор формата
                 formatOptions.forEach(option => {
                     option.addEventListener('click', () => {
                         formatOptions.forEach(opt => opt.classList.remove('selected'));
@@ -768,7 +768,6 @@
                         state.selectedFormat = option.dataset.format;
                         toStep3.disabled = false;
                         
-                        // Анимация выбора
                         option.style.animation = 'pulse 0.5s';
                         setTimeout(() => {
                             option.style.animation = '';
@@ -778,7 +777,6 @@
             }
 
             function setupDragAndDrop() {
-                // Подсветка области при перетаскивании
                 const dragEvents = ['dragenter', 'dragover', 'dragleave', 'drop'];
                 dragEvents.forEach(event => {
                     uploadArea.addEventListener(event, preventDefaults, false);
@@ -789,21 +787,18 @@
                     e.stopPropagation();
                 }
                 
-                // Подсветка области
                 ['dragenter', 'dragover'].forEach(event => {
                     uploadArea.addEventListener(event, () => {
                         uploadArea.classList.add('drag-over');
                     }, false);
                 });
                 
-                // Снятие подсветки
                 ['dragleave', 'drop'].forEach(event => {
                     uploadArea.addEventListener(event, () => {
                         uploadArea.classList.remove('drag-over');
                     }, false);
                 });
                 
-                // Обработка сброса файла
                 uploadArea.addEventListener('drop', handleDrop, false);
                 
                 function handleDrop(e) {
@@ -825,19 +820,13 @@
                 if (file.name.endsWith('.litematic')) {
                     state.selectedFile = file;
                     
-                    // Показать информацию о файле
                     fileName.textContent = file.name;
                     fileSize.textContent = formatFileSize(file.size);
                     fileInfo.style.display = 'block';
                     uploadArea.classList.add('has-file');
                     
-                    // Анимация подтверждения
                     fileInfo.style.animation = 'pulse 0.5s';
-                    
-                    // Активировать кнопку "Продолжить"
                     toStep2.disabled = false;
-                    
-                    // Обновить статус
                     errorMessage.textContent = '';
                 } else {
                     showError('Ошибка: выберите файл с расширением .litematic');
@@ -850,8 +839,6 @@
             function showError(message) {
                 errorMessage.textContent = message;
                 errorMessage.style.display = 'block';
-                
-                // Анимация ошибки
                 errorMessage.style.animation = 'shake 0.5s';
             }
 
@@ -862,78 +849,158 @@
             }
 
             function goToStep(step) {
-                // Анимация перехода
                 const currentContent = steps['content' + state.currentStep];
                 currentContent.style.animation = 'fadeInMove 0.4s reverse forwards';
                 
                 setTimeout(() => {
-                    // Скрыть текущий шаг
                     steps['step' + state.currentStep].classList.remove('active');
                     currentContent.classList.remove('active');
                     
-                    // Показать новый шаг
                     state.currentStep = step;
                     steps['step' + step].classList.add('active');
                     steps['content' + step].classList.add('active');
                     
-                    // Запустить конвертацию при переходе на шаг 3
                     if (step === 3) {
                         startConversion();
                     }
                 }, 400);
             }
 
-            function startConversion() {
+            // Функция конвертации
+            async function startConversion() {
                 if (!state.selectedFile || !state.selectedFormat) return;
                 
-                // Сбросить предыдущие сообщения
                 errorMessage.textContent = '';
                 errorMessage.style.display = 'none';
                 downloadLink.style.display = 'none';
                 progressFill.style.width = '0%';
-                
-                // Показать статус конвертации
                 statusText.textContent = 'Начало конвертации...';
                 
-                // Имитация процесса конвертации с прогрессом
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 2;
-                    progressFill.style.width = `${progress}%`;
-                    statusText.textContent = `Конвертация: ${progress}%`;
+                try {
+                    // Чтение файла
+                    const arrayBuffer = await readFileAsArrayBuffer(state.selectedFile);
                     
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        
-                        // Перейти к шагу 4
-                        setTimeout(() => {
-                            // Создать ссылку для скачивания
-                            const outputFilename = state.selectedFile.name.replace('.litematic', `.${state.selectedFormat}`);
-                            downloadLink.href = '#'; // В реальном приложении здесь будет ссылка на файл
-                            downloadLink.download = outputFilename;
-                            downloadLink.textContent = `Скачать ${outputFilename}`;
-                            downloadLink.style.display = 'inline-block';
-                            resultFileName.textContent = outputFilename;
-                            
-                            // Перейти к шагу 4
-                            goToStep(4);
-                        }, 500);
+                    // Распаковка Litematic (GZIP)
+                    statusText.textContent = 'Распаковка файла...';
+                    updateProgress(20);
+                    const uncompressed = pako.inflate(new Uint8Array(arrayBuffer));
+                    
+                    // Парсинг NBT
+                    statusText.textContent = 'Чтение структуры схемы...';
+                    updateProgress(40);
+                    const nbtData = await parseNbt(uncompressed.buffer);
+                    
+                    // Конвертация в выбранный формат
+                    statusText.textContent = 'Конвертация формата...';
+                    updateProgress(60);
+                    let resultData;
+                    
+                    if (state.selectedFormat === 'schematic') {
+                        resultData = await convertToSchematic(nbtData);
+                    } else {
+                        resultData = await convertToNbt(nbtData);
                     }
-                }, 50);
+                    
+                    // Упаковка результата
+                    statusText.textContent = 'Создание файла...';
+                    updateProgress(80);
+                    state.convertedData = resultData;
+                    
+                    // Завершение
+                    statusText.textContent = 'Завершение...';
+                    updateProgress(100);
+                    
+                    // Подготовка ссылки для скачивания
+                    setTimeout(() => {
+                        const outputFilename = state.selectedFile.name.replace('.litematic', `.${state.selectedFormat}`);
+                        const blob = new Blob([state.convertedData], { type: 'application/octet-stream' });
+                        const url = URL.createObjectURL(blob);
+                        
+                        downloadLink.href = url;
+                        downloadLink.download = outputFilename;
+                        downloadLink.textContent = `Скачать ${outputFilename}`;
+                        downloadLink.style.display = 'inline-block';
+                        resultFileName.textContent = outputFilename;
+                        fileSizeInfo.textContent = `Размер: ${formatFileSize(blob.size)}`;
+                        
+                        goToStep(4);
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('Conversion error:', error);
+                    showError(`Ошибка конвертации: ${error.message}`);
+                    toStep2from3.disabled = false;
+                }
+            }
+
+            function updateProgress(percent) {
+                progressFill.style.width = `${percent}%`;
+            }
+
+            function readFileAsArrayBuffer(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            function parseNbt(buffer) {
+                return new Promise((resolve, reject) => {
+                    nbt.parse(buffer, (error, data) => {
+                        if (error) reject(error);
+                        else resolve(data);
+                    });
+                });
+            }
+
+            // Конвертация в формат Schematic
+            async function convertToSchematic(nbtData) {
+                // Упрощенная конвертация: сохраняем основные параметры схемы
+                const schematic = {
+                    name: "Schematic",
+                    type: "compound",
+                    value: {
+                        Width: { type: 'short', value: nbtData.value.Regions.value[Object.keys(nbtData.value.Regions.value)[0]].value.Size.value[0] },
+                        Height: { type: 'short', value: nbtData.value.Regions.value[Object.keys(nbtData.value.Regions.value)[0]].value.Size.value[1] },
+                        Length: { type: 'short', value: nbtData.value.Regions.value[Object.keys(nbtData.value.Regions.value)[0]].value.Size.value[2] },
+                        Materials: { type: 'string', value: "Alpha" },
+                        Blocks: { 
+                            type: 'byteArray', 
+                            value: new Uint8Array(nbtData.value.Regions.value[Object.keys(nbtData.value.Regions.value)[0]].value.BlockStatePalette.value.length)
+                        },
+                        Data: { 
+                            type: 'byteArray', 
+                            value: new Uint8Array(nbtData.value.Regions.value[Object.keys(nbtData.value.Regions.value)[0]].value.BlockStatePalette.value.length)
+                        },
+                        Entities: { type: 'list', value: { type: 'end', value: [] } },
+                        TileEntities: { type: 'list', value: { type: 'end', value: [] } }
+                    }
+                };
+
+                // Кодируем в NBT
+                const encoded = nbt.writeUncompressed(schematic, 'big');
+                // Сжимаем в GZIP
+                return pako.gzip(encoded);
+            }
+
+            // Конвертация в формат NBT
+            async function convertToNbt(nbtData) {
+                // Для формата NBT просто возвращаем распакованные данные
+                return nbt.writeUncompressed(nbtData, 'big');
             }
 
             function resetConverter() {
-                // Анимация сброса
                 const currentContent = steps['content' + state.currentStep];
                 currentContent.style.animation = 'fadeInMove 0.4s reverse forwards';
                 
                 setTimeout(() => {
-                    // Сбросить состояние
                     state.currentStep = 1;
                     state.selectedFile = null;
                     state.selectedFormat = null;
+                    state.convertedData = null;
                     
-                    // Сбросить UI
                     fileInput.value = '';
                     fileInfo.style.display = 'none';
                     uploadArea.classList.remove('has-file');
@@ -946,7 +1013,11 @@
                     errorMessage.style.display = 'none';
                     downloadLink.style.display = 'none';
                     
-                    // Сбросить шаги
+                    // Освобождаем URL объекта
+                    if (downloadLink.href && downloadLink.href.startsWith('blob:')) {
+                        URL.revokeObjectURL(downloadLink.href);
+                    }
+                    
                     steps.step1.classList.add('active');
                     steps.step2.classList.remove('active');
                     steps.step3.classList.remove('active');
@@ -957,7 +1028,6 @@
                     steps.content3.classList.remove('active');
                     steps.content4.classList.remove('active');
                     
-                    // Вернуть анимацию
                     currentContent.style.animation = '';
                 }, 400);
             }
