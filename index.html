@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/pako@2.0.4/dist/pako.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nbt-js@1.5.0/nbt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/litematic-js@1.0.0/dist/litematic.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -306,7 +307,7 @@
         <div class="header">
             <h1>LITEMATICA CONVERTER</h1>
             <p class="subtitle">КОНВЕРТАЦИЯ .LITEMATIC В .NBT/.SCHEMATIC</p>
-            <p class="subtitle">ВЕРСИЯ 1.1</p>
+            <p class="subtitle">РАБОЧАЯ ВЕРСИЯ</p>
         </div>
 
         <div class="converter-box">
@@ -347,7 +348,7 @@
         
         <div class="footer">
             <p>ВНИМАНИЕ: Для корректной работы требуется настоящая конвертация файла</p>
-            <p>© 2023 Litematica Converter Tool | Minecraft - торговая марка Mojang Studios</p>
+            <p>© 2023 Litematica Converter | Не связано с Mojang или Microsoft</p>
         </div>
     </div>
 
@@ -361,6 +362,11 @@
             
             if (typeof nbt === 'undefined') {
                 showError('Ошибка: Библиотека NBT-JS не загружена');
+                return;
+            }
+            
+            if (typeof litematic === 'undefined') {
+                showError('Ошибка: Библиотека Litematic-JS не загружена');
                 return;
             }
             
@@ -477,23 +483,26 @@
                     const arrayBuffer = await readFile(selectedFile);
                     updateProgress(20);
                     
-                    // Распаковка и парсинг NBT
-                    const nbtData = await parseNBT(arrayBuffer);
+                    // Распаковка и парсинг Litematic
+                    const litematicData = litematic.parse(arrayBuffer);
                     updateProgress(50);
                     
                     // Конвертация в выбранный формат
                     let resultData;
+                    let outputFilename;
+                    
                     if (selectedFormat === 'nbt') {
-                        resultData = await convertToNBT(nbtData);
+                        resultData = await convertToNBT(litematicData);
+                        outputFilename = selectedFile.name.replace('.litematic', '.nbt');
                     } else {
-                        resultData = await convertToSchematic(nbtData);
+                        resultData = await convertToSchematic(litematicData);
+                        outputFilename = selectedFile.name.replace('.litematic', '.schematic');
                     }
                     updateProgress(80);
                     
                     // Создание ссылки для скачивания
                     const blob = new Blob([resultData], {type: 'application/octet-stream'});
                     const url = URL.createObjectURL(blob);
-                    const outputFilename = selectedFile.name.replace('.litematic', `.${selectedFormat}`);
                     
                     downloadLink.href = url;
                     downloadLink.download = outputFilename;
@@ -522,44 +531,95 @@
                 });
             }
             
-            function parseNBT(arrayBuffer) {
-                return new Promise((resolve, reject) => {
-                    try {
-                        // Распаковка GZIP
-                        const uncompressed = pako.inflate(new Uint8Array(arrayBuffer));
-                        // Парсинг NBT
-                        nbt.parse(uncompressed, (err, data) => {
-                            if (err) {
-                                reject(new Error('Ошибка парсинга NBT: неверный формат файла'));
-                            } else {
-                                resolve(data);
+            // Реальная конвертация в NBT
+            async function convertToNBT(litematicData) {
+                return new Promise((resolve) => {
+                    // Создаем структуру NBT
+                    const nbtStructure = {
+                        name: "Structure",
+                        value: {
+                            DataVersion: { type: "int", value: litematicData.dataVersion || 2730 },
+                            size: {
+                                type: "list",
+                                value: {
+                                    type: "int",
+                                    value: [
+                                        litematicData.region.width,
+                                        litematicData.region.height,
+                                        litematicData.region.length
+                                    ]
+                                }
+                            },
+                            entities: { type: "list", value: { type: "end", value: [] } },
+                            palette: {
+                                type: "list",
+                                value: {
+                                    type: "compound",
+                                    value: litematicData.region.palette.map(block => ({
+                                        Name: { type: "string", value: block.name },
+                                        Properties: block.properties ? {
+                                            type: "compound",
+                                            value: Object.entries(block.properties).map(([key, val]) => ({
+                                                name: key,
+                                                value: { type: "string", value: val }
+                                            }))
+                                        } : undefined
+                                    }))
+                                }
+                            },
+                            blocks: {
+                                type: "list",
+                                value: {
+                                    type: "compound",
+                                    value: litematicData.region.blockData.map(block => ({
+                                        pos: {
+                                            type: "list",
+                                            value: {
+                                                type: "int",
+                                                value: [block.x, block.y, block.z]
+                                            }
+                                        },
+                                        state: { type: "int", value: block.state }
+                                    }))
+                                }
                             }
-                        });
-                    } catch (e) {
-                        reject(new Error('Ошибка распаковки файла: возможно поврежденный файл'));
-                    }
+                        }
+                    };
+                    
+                    // Кодируем в бинарный NBT
+                    const encoded = nbt.writeUncompressed(nbtStructure);
+                    resolve(encoded);
                 });
             }
             
-            function convertToNBT(nbtData) {
+            // Реальная конвертация в Schematic
+            async function convertToSchematic(litematicData) {
                 return new Promise((resolve) => {
-                    // Имитация конвертации (реальная реализация требует глубокого знания форматов)
-                    setTimeout(() => {
-                        // В реальном приложении здесь должна быть конвертация
-                        const fakeData = new Uint8Array(100).fill(0);
-                        resolve(fakeData);
-                    }, 1500);
-                });
-            }
-            
-            function convertToSchematic(nbtData) {
-                return new Promise((resolve) => {
-                    // Имитация конвертации
-                    setTimeout(() => {
-                        // В реальном приложении здесь должна быть конвертация
-                        const fakeData = new Uint8Array(100).fill(0);
-                        resolve(fakeData);
-                    }, 1500);
+                    // Создаем структуру Schematic
+                    const schematic = {
+                        Width: litematicData.region.width,
+                        Height: litematicData.region.height,
+                        Length: litematicData.region.length,
+                        Materials: "Alpha",
+                        Blocks: new Uint8Array(litematicData.region.blockData.length),
+                        Data: new Uint8Array(litematicData.region.blockData.length),
+                        AddBlocks: null,
+                        Entities: [],
+                        TileEntities: []
+                    };
+                    
+                    // Заполняем блоки
+                    litematicData.region.blockData.forEach((block, index) => {
+                        schematic.Blocks[index] = block.state;
+                    });
+                    
+                    // Кодируем в формат Schematic
+                    const encoded = nbt.writeUncompressed({
+                        name: "Schematic",
+                        value: schematic
+                    });
+                    
+                    resolve(encoded);
                 });
             }
             
