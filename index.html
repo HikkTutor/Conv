@@ -686,6 +686,30 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        /* Новые стили для кнопок */
+        .btn-bottom {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+        
+        .step-content {
+            padding-bottom: 80px;
+            position: relative;
+        }
+        
+        @media (max-width: 768px) {
+            .btn-bottom {
+                position: static;
+                transform: none;
+                flex-direction: column;
+                margin-top: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -741,7 +765,9 @@
                     <div class="file-info-text" id="fileSize"></div>
                 </div>
                 
-                <button class="btn" id="toStep2" disabled>ПРОДОЛЖИТЬ</button>
+                <div class="btn-bottom">
+                    <button class="btn" id="toStep2" disabled>ПРОДОЛЖИТЬ</button>
+                </div>
             </div>
 
             <!-- Шаг 2: Выбор формата -->
@@ -762,7 +788,7 @@
                     </div>
                 </div>
                 
-                <div class="btn-group">
+                <div class="btn-bottom">
                     <button class="btn btn-secondary" id="toStep1">НАЗАД</button>
                     <button class="btn" id="toStep3" disabled>КОНВЕРТИРОВАТЬ</button>
                 </div>
@@ -782,7 +808,7 @@
                 <div class="status-text" id="statusText">Подготовка к конвертации...</div>
                 <div id="errorMessage" class="error-message"></div>
                 
-                <div class="btn-group">
+                <div class="btn-bottom">
                     <button class="btn btn-secondary" id="toStep2from3">НАЗАД</button>
                 </div>
             </div>
@@ -803,7 +829,7 @@
                 
                 <a id="downloadLink" class="download-link">СКАЧАТЬ ФАЙЛ</a>
                 
-                <div style="margin-top: 35px;">
+                <div class="btn-bottom">
                     <button class="btn btn-secondary" id="restartBtn">НОВАЯ КОНВЕРТАЦИЯ</button>
                 </div>
             </div>
@@ -964,21 +990,19 @@
             }
 
             function goToStep(step) {
-                const currentContent = steps['content' + state.currentStep];
-                currentContent.style.animation = 'fadeInMove 0.4s reverse forwards';
+                // Скрываем текущий активный шаг
+                steps['content' + state.currentStep].classList.remove('active');
+                steps['step' + state.currentStep].classList.remove('active');
                 
-                setTimeout(() => {
-                    steps['step' + state.currentStep].classList.remove('active');
-                    currentContent.classList.remove('active');
-                    
-                    state.currentStep = step;
-                    steps['step' + step].classList.add('active');
-                    steps['content' + step].classList.add('active');
-                    
-                    if (step === 3) {
-                        startConversion();
-                    }
-                }, 400);
+                // Показываем новый шаг
+                state.currentStep = step;
+                steps['content' + step].classList.add('active');
+                steps['step' + step].classList.add('active');
+                
+                // Специальная обработка для шага конвертации
+                if (step === 3) {
+                    startConversion();
+                }
             }
 
             // Функция конвертации
