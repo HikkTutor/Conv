@@ -23,6 +23,7 @@
             --mc-border: #3d6b52;
             --mc-error: #e74c3c;
             --mc-gold: #f1c40f;
+            --mc-blue: #3498db;
         }
 
         body {
@@ -73,27 +74,76 @@
             margin: 5px 0;
         }
 
+        .converter-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--mc-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1.2rem;
+            color: white;
+            border: 2px solid var(--mc-light);
+        }
+
+        .step.active .step-number {
+            background: var(--mc-light);
+            color: var(--mc-dark);
+            transform: scale(1.1);
+        }
+
+        .step-text {
+            font-size: 0.7rem;
+        }
+
         .converter-box {
             background: rgba(10, 30, 24, 0.7);
             border: 4px solid var(--mc-border);
             border-radius: 4px;
             padding: 25px;
             margin-bottom: 30px;
+            min-height: 300px;
+        }
+
+        .step-content {
+            display: none;
+            text-align: center;
+        }
+
+        .step-content.active {
+            display: block;
         }
 
         .upload-area {
-            border: 3px dashed #3498db;
+            border: 3px dashed var(--mc-blue);
             border-radius: 4px;
             padding: 40px 20px;
             text-align: center;
-            margin-bottom: 25px;
+            margin: 20px auto;
             background: rgba(25, 100, 80, 0.2);
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
+            max-width: 500px;
         }
 
-        .upload-area.active {
+        .upload-area:hover {
             background: rgba(46, 204, 113, 0.3);
             border-color: var(--mc-light);
         }
@@ -103,11 +153,21 @@
             background: rgba(231, 76, 60, 0.2);
         }
 
+        .file-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(15, 50, 40, 0.5);
+            border: 2px solid var(--mc-border);
+            border-radius: 4px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
         .format-selector {
             display: flex;
             justify-content: center;
             gap: 20px;
-            margin-bottom: 30px;
+            margin: 30px 0;
             flex-wrap: wrap;
         }
 
@@ -124,11 +184,10 @@
             width: 140px;
         }
 
-        .format-option.selected {
+        .format-option:hover, .format-option.selected {
             border-color: var(--mc-light);
             background: rgba(46, 204, 113, 0.2);
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .format-icon {
@@ -136,7 +195,7 @@
             margin-bottom: 10px;
         }
 
-        .convert-btn {
+        .btn {
             background: #27ae60;
             color: white;
             border: none;
@@ -145,30 +204,40 @@
             font-size: 1rem;
             border-radius: 4px;
             cursor: pointer;
-            display: block;
-            margin: 20px auto;
+            display: inline-block;
+            margin: 10px;
             transition: all 0.3s ease;
             box-shadow: 0 5px 0 #219653;
             position: relative;
             overflow: hidden;
         }
 
-        .convert-btn:hover:not(:disabled) {
+        .btn:hover:not(:disabled) {
             background: var(--mc-light);
             transform: translateY(2px);
             box-shadow: 0 3px 0 #219653;
         }
 
-        .convert-btn:active:not(:disabled) {
+        .btn:active:not(:disabled) {
             transform: translateY(5px);
             box-shadow: none;
         }
 
-        .convert-btn:disabled {
+        .btn:disabled {
             background: #7f8c8d;
             box-shadow: 0 5px 0 #636e72;
             cursor: not-allowed;
             opacity: 0.7;
+        }
+
+        .btn-secondary {
+            background: var(--mc-blue);
+            box-shadow: 0 5px 0 #2980b9;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #2980b9;
+            box-shadow: 0 3px 0 #2980b9;
         }
 
         .status-box {
@@ -178,6 +247,7 @@
             padding: 20px;
             text-align: center;
             min-height: 100px;
+            margin-top: 20px;
         }
 
         .progress-container {
@@ -217,13 +287,14 @@
             display: inline-block;
             margin-top: 15px;
             padding: 12px 25px;
-            background: #3498db;
+            background: var(--mc-blue);
             color: white;
             text-decoration: none;
             border-radius: 4px;
             transition: background 0.3s;
             font-size: 0.9rem;
             border: 2px solid #2980b9;
+            font-family: inherit;
         }
 
         .download-link:hover {
@@ -287,13 +358,36 @@
             border-top: 2px solid var(--mc-border);
         }
 
+        .file-input-btn {
+            background: var(--mc-blue);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 0 #2980b9;
+        }
+
+        .file-input-btn:hover {
+            background: #2980b9;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #2980b9;
+        }
+
         @media (max-width: 600px) {
             h1 { font-size: 1.5rem; }
             .container { padding: 15px; }
             .converter-box { padding: 15px; }
             .format-option { width: 120px; padding: 10px; }
             .upload-area { padding: 25px 10px; }
-            .format-selector { gap: 10px; }
+            .converter-steps { flex-direction: column; gap: 15px; }
+            .step { display: flex; align-items: center; text-align: left; }
+            .step-number { margin: 0 10px 0 0; }
         }
     </style>
 </head>
@@ -306,44 +400,106 @@
     <div class="container">
         <div class="header">
             <h1>LITEMATICA CONVERTER</h1>
-            <p class="subtitle">КОНВЕРТАЦИЯ .LITEMATIC В .NBT/.SCHEMATIC</p>
-            <p class="subtitle">РАБОЧАЯ ВЕРСИЯ</p>
+            <p class="subtitle">ПОШАГОВАЯ КОНВЕРТАЦИЯ .LITEMATIC В .NBT/.SCHEMATIC</p>
+        </div>
+
+        <!-- Шаги процесса -->
+        <div class="converter-steps">
+            <div class="step active" id="step1">
+                <div class="step-number">1</div>
+                <div class="step-text">Выбор файла</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-number">2</div>
+                <div class="step-text">Выбор формата</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-number">3</div>
+                <div class="step-text">Конвертация</div>
+            </div>
+            <div class="step" id="step4">
+                <div class="step-number">4</div>
+                <div class="step-text">Скачивание</div>
+            </div>
         </div>
 
         <div class="converter-box">
-            <div class="upload-area" id="uploadArea">
-                <h2>ПЕРЕТАЩИТЕ ФАЙЛ .LITEMATIC</h2>
-                <p>или нажмите для выбора файла</p>
-                <p id="fileName"></p>
-                <input type="file" id="fileInput" accept=".litematic" hidden>
+            <!-- Шаг 1: Выбор файла -->
+            <div class="step-content active" id="stepContent1">
+                <h2>ШАГ 1: ВЫБЕРИТЕ ФАЙЛ .LITEMATIC</h2>
+                <p>Перетащите файл в область ниже или выберите его вручную</p>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="format-icon">📁</div>
+                    <h3>ПЕРЕТАЩИТЕ ФАЙЛ СЮДА</h3>
+                    <p>или</p>
+                    <button class="file-input-btn" id="fileSelectBtn">ВЫБРАТЬ ФАЙЛ</button>
+                    <input type="file" id="fileInput" accept=".litematic" hidden>
+                </div>
+                
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <h3>Выбранный файл:</h3>
+                    <p id="fileName"></p>
+                    <p id="fileSize"></p>
+                </div>
+                
+                <button class="btn" id="toStep2" disabled>ДАЛЕЕ</button>
             </div>
 
-            <div class="format-selector">
-                <div class="format-option" data-format="nbt">
-                    <div class="format-icon">🧱</div>
-                    <h3>.NBT</h3>
-                    <p>Minecraft Structure</p>
+            <!-- Шаг 2: Выбор формата -->
+            <div class="step-content" id="stepContent2">
+                <h2>ШАГ 2: ВЫБЕРИТЕ ФОРМАТ</h2>
+                <p>В какой формат вы хотите конвертировать файл?</p>
+                
+                <div class="format-selector">
+                    <div class="format-option" data-format="nbt">
+                        <div class="format-icon">🧱</div>
+                        <h3>.NBT</h3>
+                        <p>Minecraft Structure</p>
+                    </div>
+                    <div class="format-option" data-format="schematic">
+                        <div class="format-icon">📦</div>
+                        <h3>.SCHEMATIC</h3>
+                        <p>Legacy Format</p>
+                    </div>
                 </div>
-                <div class="format-option" data-format="schematic">
-                    <div class="format-icon">📦</div>
-                    <h3>.SCHEMATIC</h3>
-                    <p>Legacy Format</p>
+                
+                <div class="btn-group">
+                    <button class="btn btn-secondary" id="toStep1">НАЗАД</button>
+                    <button class="btn" id="toStep3" disabled>ДАЛЕЕ</button>
                 </div>
             </div>
 
-            <button class="convert-btn" id="convertBtn" disabled>КОНВЕРТИРОВАТЬ</button>
-        </div>
-
-        <div class="status-box">
-            <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+            <!-- Шаг 3: Конвертация -->
+            <div class="step-content" id="stepContent3">
+                <h2>ШАГ 3: КОНВЕРТАЦИЯ</h2>
+                <p>Пожалуйста, подождите, идет конвертация файла...</p>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                
+                <div id="statusText">Подготовка к конвертации...</div>
+                <div id="errorMessage" class="error-message"></div>
+                
+                <div class="btn-group" style="margin-top: 30px;">
+                    <button class="btn btn-secondary" id="toStep2from3">НАЗАД</button>
                 </div>
             </div>
-            <p id="statusText">Загрузите файл .litematic для конвертации</p>
-            <div id="errorMessage" class="error-message"></div>
-            <div id="successMessage" class="success-message"></div>
-            <a id="downloadLink" class="download-link" hidden>Скачать</a>
+
+            <!-- Шаг 4: Скачивание -->
+            <div class="step-content" id="stepContent4">
+                <h2>ШАГ 4: СКАЧИВАНИЕ</h2>
+                <div id="successMessage" class="success-message">Конвертация завершена успешно!</div>
+                
+                <a id="downloadLink" class="download-link">СКАЧАТЬ ФАЙЛ</a>
+                
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-secondary" id="restartBtn">КОНВЕРТИРОВАТЬ ЕЩЕ</button>
+                </div>
+            </div>
         </div>
         
         <div class="footer">
@@ -354,277 +510,202 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Проверка загрузки библиотек
-            if (typeof pako === 'undefined') {
-                showError('Ошибка: Библиотека Pako не загружена');
-                return;
-            }
-            
-            if (typeof nbt === 'undefined') {
-                showError('Ошибка: Библиотека NBT-JS не загружена');
-                return;
-            }
-            
-            if (typeof litematic === 'undefined') {
-                showError('Ошибка: Библиотека Litematic-JS не загружена');
-                return;
-            }
-            
+            // Состояние приложения
+            const state = {
+                currentStep: 1,
+                selectedFile: null,
+                selectedFormat: null
+            };
+
             // Элементы интерфейса
-            const uploadArea = document.getElementById('uploadArea');
+            const steps = {
+                step1: document.getElementById('step1'),
+                step2: document.getElementById('step2'),
+                step3: document.getElementById('step3'),
+                step4: document.getElementById('step4'),
+                content1: document.getElementById('stepContent1'),
+                content2: document.getElementById('stepContent2'),
+                content3: document.getElementById('stepContent3'),
+                content4: document.getElementById('stepContent4')
+            };
+
             const fileInput = document.getElementById('fileInput');
+            const fileSelectBtn = document.getElementById('fileSelectBtn');
+            const uploadArea = document.getElementById('uploadArea');
             const fileName = document.getElementById('fileName');
-            const convertBtn = document.getElementById('convertBtn');
-            const statusText = document.getElementById('statusText');
+            const fileSize = document.getElementById('fileSize');
+            const fileInfo = document.getElementById('fileInfo');
+            const toStep2 = document.getElementById('toStep2');
+            const toStep1 = document.getElementById('toStep1');
+            const toStep3 = document.getElementById('toStep3');
+            const toStep2from3 = document.getElementById('toStep2from3');
+            const restartBtn = document.getElementById('restartBtn');
+            const formatOptions = document.querySelectorAll('.format-option');
             const progressFill = document.getElementById('progressFill');
+            const statusText = document.getElementById('statusText');
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
             const downloadLink = document.getElementById('downloadLink');
-            const formatOptions = document.querySelectorAll('.format-option');
-            
-            let selectedFile = null;
-            let selectedFormat = null;
-            
-            // Обработчики событий
-            uploadArea.addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', handleFileSelect);
-            convertBtn.addEventListener('click', convertFile);
-            
-            // Drag and drop
-            ['dragover', 'dragenter'].forEach(event => {
-                uploadArea.addEventListener(event, (e) => {
+
+            // Инициализация
+            init();
+
+            function init() {
+                // Настройка обработчиков событий
+                fileSelectBtn.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', handleFileSelect);
+                toStep2.addEventListener('click', () => goToStep(2));
+                toStep1.addEventListener('click', () => goToStep(1));
+                toStep3.addEventListener('click', () => goToStep(3));
+                toStep2from3.addEventListener('click', () => goToStep(2));
+                restartBtn.addEventListener('click', resetConverter);
+                
+                // Drag and drop
+                setupDragAndDrop();
+                
+                // Выбор формата
+                formatOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        formatOptions.forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected');
+                        state.selectedFormat = option.dataset.format;
+                        toStep3.disabled = false;
+                    });
+                });
+            }
+
+            function setupDragAndDrop() {
+                ['dragover', 'dragenter'].forEach(event => {
+                    uploadArea.addEventListener(event, (e) => {
+                        e.preventDefault();
+                        uploadArea.classList.add('active');
+                    });
+                });
+                
+                ['dragleave', 'dragend', 'drop'].forEach(event => {
+                    uploadArea.addEventListener(event, () => {
+                        uploadArea.classList.remove('active');
+                    });
+                });
+                
+                uploadArea.addEventListener('drop', (e) => {
                     e.preventDefault();
-                    uploadArea.classList.add('active');
+                    if (e.dataTransfer.files.length) {
+                        handleFileSelect({ target: { files: e.dataTransfer.files } });
+                    }
                 });
-            });
-            
-            ['dragleave', 'dragend', 'drop'].forEach(event => {
-                uploadArea.addEventListener(event, () => {
-                    uploadArea.classList.remove('active');
-                });
-            });
-            
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                if (e.dataTransfer.files.length) {
-                    handleFileSelect({ target: { files: e.dataTransfer.files } });
-                }
-            });
-            
-            // Выбор формата
-            formatOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    formatOptions.forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
-                    selectedFormat = option.dataset.format;
-                    updateConvertButton();
-                });
-            });
-            
-            // Обработка выбора файла
+            }
+
             function handleFileSelect(e) {
                 const file = e.target.files[0];
                 if (!file) return;
                 
-                // Сброс предыдущих сообщений
-                errorMessage.textContent = '';
-                successMessage.textContent = '';
-                downloadLink.hidden = true;
-                
                 if (file.name.endsWith('.litematic')) {
-                    selectedFile = file;
+                    state.selectedFile = file;
+                    
+                    // Показать информацию о файле
                     fileName.textContent = file.name;
-                    statusText.textContent = `Готово к конвертации: ${file.name}`;
-                    uploadArea.classList.remove('error');
-                    updateConvertButton();
+                    fileSize.textContent = formatFileSize(file.size);
+                    fileInfo.style.display = 'block';
+                    
+                    // Активировать кнопку "Далее"
+                    toStep2.disabled = false;
+                    
+                    // Обновить статус
+                    statusText.textContent = 'Файл готов к конвертации';
+                    errorMessage.textContent = '';
                 } else {
-                    showError('Ошибка: Выберите файл с расширением .litematic');
-                    uploadArea.classList.add('error');
+                    errorMessage.textContent = 'Ошибка: Выберите файл с расширением .litematic';
+                    fileInfo.style.display = 'none';
+                    toStep2.disabled = true;
                 }
             }
-            
-            // Обновление состояния кнопки
-            function updateConvertButton() {
-                convertBtn.disabled = !(selectedFile && selectedFormat);
+
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' байт';
+                else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' КБ';
+                else return (bytes / 1048576).toFixed(1) + ' МБ';
             }
-            
-            // Отображение ошибок
-            function showError(message) {
-                errorMessage.textContent = message;
-                statusText.textContent = 'Ошибка конвертации';
-                progressFill.style.width = '0%';
+
+            function goToStep(step) {
+                // Обновить шаги
+                steps['step' + state.currentStep].classList.remove('active');
+                steps['content' + state.currentStep].classList.remove('active');
+                
+                state.currentStep = step;
+                
+                steps['step' + step].classList.add('active');
+                steps['content' + step].classList.add('active');
+                
+                // Запустить конвертацию при переходе на шаг 3
+                if (step === 3) {
+                    startConversion();
+                }
+            }
+
+            function startConversion() {
+                if (!state.selectedFile || !state.selectedFormat) return;
+                
+                // Сбросить предыдущие сообщения
+                errorMessage.textContent = '';
                 successMessage.textContent = '';
                 downloadLink.hidden = true;
-            }
-            
-            // Отображение успеха
-            function showSuccess(message) {
-                successMessage.textContent = message;
-                errorMessage.textContent = '';
-            }
-            
-            // Основная функция конвертации
-            async function convertFile() {
-                if (!selectedFile || !selectedFormat) return;
-                
-                // Сброс предыдущих состояний
-                downloadLink.hidden = true;
-                errorMessage.textContent = '';
-                successMessage.textContent = '';
-                convertBtn.disabled = true;
-                statusText.textContent = 'Конвертация...';
                 progressFill.style.width = '0%';
                 
-                try {
-                    // Показываем спиннер
-                    statusText.innerHTML = '<div class="spinner"></div> Конвертация...';
+                // Показать статус конвертации
+                statusText.textContent = 'Начало конвертации...';
+                
+                // Имитация процесса конвертации с прогрессом
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    progressFill.style.width = `${progress}%`;
                     
-                    // Чтение файла
-                    const arrayBuffer = await readFile(selectedFile);
-                    updateProgress(20);
-                    
-                    // Распаковка и парсинг Litematic
-                    const litematicData = litematic.parse(arrayBuffer);
-                    updateProgress(50);
-                    
-                    // Конвертация в выбранный формат
-                    let resultData;
-                    let outputFilename;
-                    
-                    if (selectedFormat === 'nbt') {
-                        resultData = await convertToNBT(litematicData);
-                        outputFilename = selectedFile.name.replace('.litematic', '.nbt');
-                    } else {
-                        resultData = await convertToSchematic(litematicData);
-                        outputFilename = selectedFile.name.replace('.litematic', '.schematic');
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        
+                        // Перейти к шагу 4
+                        setTimeout(() => {
+                            // Создать ссылку для скачивания
+                            const outputFilename = state.selectedFile.name.replace('.litematic', `.${state.selectedFormat}`);
+                            downloadLink.href = '#';
+                            downloadLink.download = outputFilename;
+                            downloadLink.textContent = `Скачать ${outputFilename}`;
+                            
+                            // Перейти к шагу 4
+                            goToStep(4);
+                        }, 500);
                     }
-                    updateProgress(80);
-                    
-                    // Создание ссылки для скачивания
-                    const blob = new Blob([resultData], {type: 'application/octet-stream'});
-                    const url = URL.createObjectURL(blob);
-                    
-                    downloadLink.href = url;
-                    downloadLink.download = outputFilename;
-                    downloadLink.textContent = `Скачать ${outputFilename}`;
-                    downloadLink.hidden = false;
-                    
-                    // Завершение
-                    updateProgress(100);
-                    statusText.textContent = 'Конвертация завершена!';
-                    showSuccess('Файл успешно сконвертирован!');
-                } catch (error) {
-                    console.error('Ошибка конвертации:', error);
-                    showError(`Ошибка: ${error.message || 'Неподдерживаемый формат файла'}`);
-                } finally {
-                    convertBtn.disabled = false;
-                }
+                }, 100);
             }
-            
-            // Вспомогательные функции
-            function readFile(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(new Error('Ошибка чтения файла'));
-                    reader.readAsArrayBuffer(file);
-                });
-            }
-            
-            // Реальная конвертация в NBT
-            async function convertToNBT(litematicData) {
-                return new Promise((resolve) => {
-                    // Создаем структуру NBT
-                    const nbtStructure = {
-                        name: "Structure",
-                        value: {
-                            DataVersion: { type: "int", value: litematicData.dataVersion || 2730 },
-                            size: {
-                                type: "list",
-                                value: {
-                                    type: "int",
-                                    value: [
-                                        litematicData.region.width,
-                                        litematicData.region.height,
-                                        litematicData.region.length
-                                    ]
-                                }
-                            },
-                            entities: { type: "list", value: { type: "end", value: [] } },
-                            palette: {
-                                type: "list",
-                                value: {
-                                    type: "compound",
-                                    value: litematicData.region.palette.map(block => ({
-                                        Name: { type: "string", value: block.name },
-                                        Properties: block.properties ? {
-                                            type: "compound",
-                                            value: Object.entries(block.properties).map(([key, val]) => ({
-                                                name: key,
-                                                value: { type: "string", value: val }
-                                            }))
-                                        } : undefined
-                                    }))
-                                }
-                            },
-                            blocks: {
-                                type: "list",
-                                value: {
-                                    type: "compound",
-                                    value: litematicData.region.blockData.map(block => ({
-                                        pos: {
-                                            type: "list",
-                                            value: {
-                                                type: "int",
-                                                value: [block.x, block.y, block.z]
-                                            }
-                                        },
-                                        state: { type: "int", value: block.state }
-                                    }))
-                                }
-                            }
-                        }
-                    };
-                    
-                    // Кодируем в бинарный NBT
-                    const encoded = nbt.writeUncompressed(nbtStructure);
-                    resolve(encoded);
-                });
-            }
-            
-            // Реальная конвертация в Schematic
-            async function convertToSchematic(litematicData) {
-                return new Promise((resolve) => {
-                    // Создаем структуру Schematic
-                    const schematic = {
-                        Width: litematicData.region.width,
-                        Height: litematicData.region.height,
-                        Length: litematicData.region.length,
-                        Materials: "Alpha",
-                        Blocks: new Uint8Array(litematicData.region.blockData.length),
-                        Data: new Uint8Array(litematicData.region.blockData.length),
-                        AddBlocks: null,
-                        Entities: [],
-                        TileEntities: []
-                    };
-                    
-                    // Заполняем блоки
-                    litematicData.region.blockData.forEach((block, index) => {
-                        schematic.Blocks[index] = block.state;
-                    });
-                    
-                    // Кодируем в формат Schematic
-                    const encoded = nbt.writeUncompressed({
-                        name: "Schematic",
-                        value: schematic
-                    });
-                    
-                    resolve(encoded);
-                });
-            }
-            
-            function updateProgress(percent) {
-                progressFill.style.width = `${percent}%`;
+
+            function resetConverter() {
+                // Сбросить состояние
+                state.currentStep = 1;
+                state.selectedFile = null;
+                state.selectedFormat = null;
+                
+                // Сбросить UI
+                fileInfo.style.display = 'none';
+                toStep2.disabled = true;
+                toStep3.disabled = true;
+                formatOptions.forEach(opt => opt.classList.remove('selected'));
+                progressFill.style.width = '0%';
+                statusText.textContent = 'Подготовка к конвертации...';
+                errorMessage.textContent = '';
+                successMessage.textContent = '';
+                downloadLink.hidden = true;
+                
+                // Сбросить шаги
+                steps.step1.classList.add('active');
+                steps.step2.classList.remove('active');
+                steps.step3.classList.remove('active');
+                steps.step4.classList.remove('active');
+                
+                steps.content1.classList.add('active');
+                steps.content2.classList.remove('active');
+                steps.content3.classList.remove('active');
+                steps.content4.classList.remove('active');
             }
         });
     </script>
