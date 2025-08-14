@@ -613,12 +613,20 @@
             border-left: 3px solid var(--warning);
         }
         
+        .notification.error {
+            border-left: 3px solid var(--error);
+        }
+        
         .notification.success i {
             color: var(--success);
         }
         
         .notification.warning i {
             color: var(--warning);
+        }
+        
+        .notification.error i {
+            color: var(--error);
         }
         
         .notification.show {
@@ -1135,9 +1143,12 @@
             if (type === 'success') {
                 notification.classList.add('success');
                 icon.className = 'fas fa-check-circle';
-            } else {
+            } else if (type === 'warning') {
                 notification.classList.add('warning');
                 icon.className = 'fas fa-exclamation-circle';
+            } else if (type === 'error') {
+                notification.classList.add('error');
+                icon.className = 'fas fa-times-circle';
             }
             
             notification.classList.add('show');
@@ -1153,28 +1164,46 @@
         }
         
         function transferCoords() {
-            const resultText = document.getElementById('result-display').textContent;
+            const x = document.getElementById('input-x').value;
+            const y = document.getElementById('input-y').value;
+            const z = document.getElementById('input-z').value;
             
-            if (resultText === "Введите координаты") {
+            if (!x && !y && !z) {
                 showNotification("Введите координаты для переноса", 'warning');
                 return;
             }
             
-            const coords = resultText.match(/-?\d+(\.\d+)?/g);
-            if (coords && coords.length === 3) {
-                document.getElementById('input-x').value = coords[0];
-                document.getElementById('input-y').value = coords[1];
-                document.getElementById('input-z').value = coords[2];
+            if (currentMode === 'overworld') {
+                const numX = parseFloat(x) || 0;
+                const numZ = parseFloat(z) || 0;
                 
-                switchMode(currentMode === 'overworld' ? 'nether' : 'overworld');
-                showNotification('Координаты перенесены!', 'success');
-                
-                if (window.innerWidth > 768) {
-                    setTimeout(() => {
-                        document.getElementById('input-x').focus();
-                    }, 100);
+                if (numX < MIN_NETHER || numX > MAX_NETHER || numZ < MIN_NETHER || numZ > MAX_NETHER) {
+                    showNotification("Координаты слишком большие для Незера!", 'error');
+                    return;
                 }
+                
+                switchMode('nether');
+                document.getElementById('input-x').value = x;
+                document.getElementById('input-y').value = y;
+                document.getElementById('input-z').value = z;
+                showNotification('Координаты перенесены в Незер!', 'success');
+            } else {
+                const numX = parseFloat(x) || 0;
+                const numZ = parseFloat(z) || 0;
+                
+                if (numX < MIN_OVERWORLD || numX > MAX_OVERWORLD || numZ < MIN_OVERWORLD || numZ > MAX_OVERWORLD) {
+                    showNotification("Координаты слишком большие для Обычного мира!", 'error');
+                    return;
+                }
+                
+                switchMode('overworld');
+                document.getElementById('input-x').value = x;
+                document.getElementById('input-y').value = y;
+                document.getElementById('input-z').value = z;
+                showNotification('Координаты перенесены в Обычный мир!', 'success');
             }
+            
+            updateResults();
         }
         
         function switchMode(mode) {
@@ -1406,4 +1435,4 @@
         });
     </script>
 </body>
-                        </html>
+    </html>
